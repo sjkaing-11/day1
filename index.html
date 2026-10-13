@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>터치우드랩 (TOUCHWOOD LAB) | 제주의 이야기를 나무에 담다</title>
+  
+  <!-- 구글 웹폰트 CDN (트렌디한 Outfit 영문 + 정갈한 Noto Sans KR 국문) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+
+  <!-- 캔바 스타일 축제 폭죽 라이브러리 CDN (canvas-confetti) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ========================================================
+       🎨 캔바 감성 테마별 컬러 변수 설정
+       ======================================================== */
+    :root {
+      /* 기본: 🌲 제주 숲&원목 테마 */
+      --bg-gradient: linear-gradient(135deg, #f5f9f6 0%, #eaf4ed 50%, #fdfbf7 100%);
+      --primary-gradient: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+      --accent-gradient: linear-gradient(135deg, #e76f51 0%, #f4a261 100%);
+      --highlight-gradient: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+      --card-bg: rgba(255, 255, 255, 0.82);
+      --card-border: rgba(255, 255, 255, 0.95);
+      --card-shadow: 0 16px 36px rgba(45, 106, 79, 0.12);
+      --text-main: #1b2d24;
+      --text-muted: #526b5d;
+      --blob-1: rgba(82, 183, 136, 0.35);
+      --blob-2: rgba(45, 106, 79, 0.25);
+      --blob-3: rgba(244, 162, 97, 0.3);
+      --tag-bg: #ffffff;
+      --tag-border: #d8f3dc;
+    }
+
+    /* 🦄 캔바 매직 오로라 테마 */
+    body.theme-aurora {
+      --bg-gradient: linear-gradient(135deg, #fcebf2 0%, #edf2fb 50%, #fff1e6 100%);
+      --primary-gradient: linear-gradient(135deg, #7928ca 0%, #ff0080 100%);
+      --accent-gradient: linear-gradient(135deg, #0070f3 0%, #00dfd8 100%);
+      --highlight-gradient: linear-gradient(135deg, #ff0080 0%, #ff8a00 100%);
+      --card-bg: rgba(255, 255, 255, 0.78);
+      --card-border: rgba(255, 255, 255, 0.9);
+      --card-shadow: 0 16px 36px rgba(121, 40, 202, 0.14);
+      --text-main: #1e1b4b;
+      --text-muted: #64748b;
+      --blob-1: rgba(255, 0, 128, 0.32);
+      --blob-2: rgba(121, 40, 202, 0.3);
+      --blob-3: rgba(0, 223, 216, 0.35);
+      --tag-bg: #ffffff;
+      --tag-border: #fbcfe8;
+    }
+
+    /* 🌊 제주 오션 & 네온 테마 */
+    body.theme-ocean {
+      --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f0fdfa 50%, #eff6ff 100%);
+      --primary-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      --accent-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+      --highlight-gradient: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(255, 255, 255, 0.95);
+      --card-shadow: 0 16px 36px rgba(3, 105, 161, 0.12);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --blob-1: rgba(14, 165, 233, 0.3);
+      --blob-2: rgba(20, 184, 166, 0.32);
+      --blob-3: rgba(245, 158, 11, 0.25);
+      --tag-bg: #ffffff;
+      --tag-border: #bae6fd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background 0.35s ease, color 0.25s ease;
+    }
+
+    body {
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 18px 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ========================================================
+       ✨ 캔바 오로라 플로팅 블롭 (살아 움직이는 배경 빛)
+       ======================================================== */
+    .blob-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(85px);
+      animation: floatMotion 14s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      width: 420px;
+      height: 420px;
+      background: var(--blob-1);
+      top: -12%;
+      left: -8%;
+    }
+
+    .blob-2 {
+      width: 460px;
+      height: 460px;
+      background: var(--blob-2);
+      bottom: -15%;
+      right: -10%;
+      animation-duration: 18s;
+      animation-delay: -4s;
+    }
+
+    .blob-3 {
+      width: 340px;
+      height: 340px;
+      background: var(--blob-3);
+      top: 45%;
+      left: 60%;
+      animation-duration: 16s;
+      animation-delay: -8s;
+    }
+
+    @keyframes floatMotion {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(70px, 90px) scale(1.18) rotate(110deg); }
+      100% { transform: translate(-50px, -70px) scale(0.92) rotate(220deg); }
+    }
+
+    /* ========================================================
+       📱 메인 랩퍼 & 상단 툴바
+       ======================================================== */
+    .container {
+      width: 100%;
+      max-width: 860px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .theme-group {
+      display: flex;
+      background: var(--card-bg);
+      padding: 5px;
+      border-radius: 50px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .theme-btn {
+      border: none;
+      background: transparent;
+      padding: 7px 15px;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: inherit;
+      transition: all 0.25s ease;
+    }
+
+    .theme-btn.active {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+
+    .confetti-btn {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 22px rgba(231, 111, 81, 0.35);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+
+    .confetti-btn:hover {
+      transform: scale(1.05) rotate(-1deg);
+      box-shadow: 0 12px 28px rgba(231, 111, 81, 0.5);
+    }
+
+    .confetti-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* 글래스모피즘 공통 카드 */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 30px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    /* ========================================================
+       🌟 1. 헤더: 터치우드랩 브랜드 비전 & 로고
+       ======================================================== */
+    .header {
+      padding: 48px 36px 38px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* 캔바 스타일 플로팅 스티커 */
+    .floating-sticker {
+      position: absolute;
+      background: #ffffff;
+      color: #1b2d24;
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 50px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      animation: stickerBob 3.2s infinite ease-in-out alternate;
+    }
+
+    .sticker-left {
+      top: 25px;
+      left: 28px;
+      border: 1.5px solid #52b788;
+    }
+
+    .sticker-right {
+      top: 25px;
+      right: 28px;
+      border: 1.5px solid #e76f51;
+      animation-delay: -1.6s;
+    }
+
+    @keyframes stickerBob {
+      0% { transform: translateY(0) rotate(-4deg); }
+      100% { transform: translateY(-8px) rotate(4deg); }
+    }
+
+    /* 회전하는 브랜드 심볼 링 */
+    .brand-symbol-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 10px auto 20px;
+      cursor: pointer;
+    }
+
+    .brand-glow-ring {
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #52b788, #2d6a4f, #f4a261, #e76f51, #52b788);
+      animation: spinSymbol 8s linear infinite;
+    }
+
+    @keyframes spinSymbol {
+      to { transform: rotate(360deg); }
+    }
+
+    .brand-symbol {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.4rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      user-select: none;
+    }
+
+    .badge-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-gradient);
+      color: #ffffff;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 6px 18px;
+      border-radius: 50px;
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+    }
+
+    .brand-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .brand-korean-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* 동적 타이핑 슬로건 */
+    .typing-box {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      min-height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      word-break: keep-all;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1.25em;
+      background: var(--primary-gradient);
+      border-radius: 2px;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* 인터랙티브 태그 칩 */
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .tag-chip {
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .tag-chip:hover {
+      transform: translateY(-4px) scale(1.06);
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(231, 111, 81, 0.35);
+    }
+
+    /* ========================================================
+       🌱 2. 3대 브랜드 핵심 가치 (Value Pillars)
+       ======================================================== */
+    .values-section {
+      padding: 34px;
+    }
+
+    .section-title {
+      font-size: 1.55rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .value-box {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 24px 18px;
+      text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .value-box:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+
+    .value-icon {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+
+    .value-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .value-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    /* ========================================================
+       🎲 3. 대표 제품 3종 (인터랙티브 쇼케이스 카드)
+       ======================================================== */
+    .products-section {
+      padding: 34px;
+    }
+
+    .product-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 20px 35px rgba(45, 106, 79, 0.2);
+      border-color: #52b788;
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 50px;
+      background: var(--accent-gradient);
+      color: #ffffff;
+    }
+
+    .product-icon-box {
+      width: 85px;
+      height: 85px;
+      border-radius: 24px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-icon-box {
+      transform: scale(1.15) rotate(6deg);
+    }
+
+    .product-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .product-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      word-break: keep-all;
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+
+    .product-meta {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #2d6a4f;
+      background: #d8f3dc;
+      padding: 6px 14px;
+      border-radius: 50px;
+    }
+
+    /* ========================================================
+       🔑 4. 특별 굿즈: 포켓 미로 키링 (실제 사진 매칭)
+       ======================================================== */
+    .goods-box {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 24px;
+      padding: 22px 26px;
+      margin-top: 22px;
+      border: 1px dashed rgba(45, 106, 79, 0.3);
+    }
+
+    .goods-img-wrapper {
+      width: 110px;
+      height: 110px;
+      border-radius: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .goods-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .goods-box:hover .goods-img {
+      transform: scale(1.1);
+    }
+
+    .goods-info {
+      flex: 1;
+    }
+
+    .goods-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .goods-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    /* ========================================================
+       💡 5. B2C & B2B 맞춤 가치 (듀얼 포지셔닝)
+       ======================================================== */
+    .dual-section {
+      padding: 34px;
+    }
+
+    .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 14px;
+    }
+
+    .dual-card {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 26px 22px;
+    }
+
+    .dual-tag {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 50px;
+      margin-bottom: 12px;
+    }
+
+    .tag-b2c {
+      background: #ffe5ec;
+      color: #d90429;
+    }
+
+    .tag-b2b {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+
+    .dual-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .dual-text {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    /* ========================================================
+       📊 6. 렌탈 & 도입 안내 (서비스 모델)
+       ======================================================== */
+    .pricing-section {
+      padding: 34px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .price-box {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 22px 16px;
+      transition: transform 0.25s ease;
+    }
+
+    .price-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .price-type {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .price-amount {
+      font-size: 1.85rem;
+      font-weight: 900;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .price-detail {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* 하단 액션 버튼 */
+    .cta-area {
+      text-align: center;
+      margin-top: 26px;
+    }
+
+    .cta-btn {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border: none;
+      padding: 15px 38px;
+      border-radius: 50px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(45, 106, 79, 0.3);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+
+    .cta-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 14px 34px rgba(45, 106, 79, 0.45);
+    }
+
+    /* 푸터 */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* ========================================================
+       📱 모바일 최적화
+       ======================================================== */
+    @media (max-width: 720px) {
+      body {
+        padding: 20px 14px;
+      }
+
+      .brand-title {
+        font-size: 2.5rem;
+      }
+
+      .typing-box {
+        font-size: 1.15rem;
+      }
+
+      .values-grid, .product-cards-grid, .dual-grid, .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .floating-sticker {
+        display: none;
+      }
+
+      .goods-box {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .top-toolbar {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 배경에 흐르는 유기적 오로라 블롭 빛 -->
+  <div class="blob-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="container">
+    <!-- 상단 툴바: 테마 변경 버튼 + 축제 폭죽 발사 버튼 -->
+    <div class="top-toolbar">
+      <div class="theme-group">
+        <button class="theme-btn active" onclick="changeTheme('', this)">🌲 제주 숲&원목</button>
+        <button class="theme-btn" onclick="changeTheme('theme-aurora', this)">🦄 캔바 오로라</button>
+        <button class="theme-btn" onclick="changeTheme('theme-ocean', this)">🌊 제주 오션</button>
+      </div>
+
+      <button class="confetti-btn" onclick="fireCheerConfetti()">
+        <span>🎉</span> 터치우드랩 폭죽 발사!
+      </button>
+    </div>
+
+    <!-- 1. 헤더: 브랜드 공식 아이덴티티 -->
+    <header class="glass-card header">
+      <!-- 캔바 스타일 플로팅 스티커 배지 -->
+      <div class="floating-sticker sticker-left">✨ LOCAL WOOD</div>
+      <div class="floating-sticker sticker-right">🌿 SUSTAINABLE</div>
+
+      <!-- 회전하는 오로라 링 & 브랜드 심볼 -->
+      <div class="brand-symbol-wrapper" onclick="fireCheerConfetti()" title="클릭하면 축하 폭죽이 팡팡 터져요!">
+        <div class="brand-glow-ring"></div>
+        <div class="brand-symbol">🪵</div>
+      </div>
+
+      <div class="badge-sub">제주의 이야기를 나무에 담다</div>
+      <h1 class="brand-title">TOUCHWOOD LAB</h1>
+      <div class="brand-korean-name">터치우드랩 (대표: 김수정)</div>
+
+      <!-- 동적 타이핑 슬로건 -->
+      <div class="typing-box">
+        <span id="typing-text"></span><span class="cursor"></span>
+      </div>
+
+      <!-- 인터랙티브 태그 클라우드 -->
+      <div class="tag-cloud">
+        <span class="tag-chip" onclick="popTag(this)">🌲 제주산 원목</span>
+        <span class="tag-chip" onclick="popTag(this)">⚡ 무전력 아날로그 놀이</span>
+        <span class="tag-chip" onclick="popTag(this)">⛰️ 제주 오름 디스크</span>
+        <span class="tag-chip" onclick="popTag(this)">👨‍👩‍👧‍👦 스마트폰 디톡스</span>
+        <span class="tag-chip" onclick="popTag(this)">☕ 카페·숙소 공간 구독</span>
+      </div>
+    </header>
+
+    <!-- 2. 브랜드 3대 핵심 가치 -->
+    <section class="glass-card values-section">
+      <h2 class="section-title">✨ 터치우드랩의 3대 핵심 가치</h2>
+      <div class="values-grid">
+        <div class="value-box">
+          <div class="value-icon">🌿</div>
+          <h3 class="value-title">제주다움</h3>
+          <p class="value-desc">오름, 한라산, 해녀 등 제주의 실제 지형과 고유한 이야기를 게임 규칙에 진정성 있게 담았습니다.</p>
+        </div>
+        <div class="value-box">
+          <div class="value-icon">🤝</div>
+          <h3 class="value-title">연결</h3>
+          <p class="value-desc">스마트폰 화면을 내려놓고, 온 가족과 이웃이 서로 눈을 맞추며 함께 웃고 대화하도록 잇습니다.</p>
+        </div>
+        <div class="value-box">
+          <div class="value-icon">🖐️</div>
+          <h3 class="value-title">손의 경험</h3>
+          <p class="value-desc">전기나 배터리 없이 따뜻한 원목의 질감을 손끝으로 만지고 움직이며 몰입하는 아날로그 감성을 선사합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 대표 제품 3종 라인업 -->
+    <section class="glass-card products-section">
+      <h2 class="section-title">🎲 대표 목재 놀이콘텐츠 라인업</h2>
+      <div class="product-cards-grid">
+        <!-- 제품 1: 제주 오름 디스크게임 -->
+        <div class="product-card" onclick="fireProductConfetti('⛰️ 제주 오름 디스크!')">
+          <span class="product-badge">대표 1위 🏆</span>
+          <div class="product-icon-box">⛰️</div>
+          <h3 class="product-name">제주 오름 디스크</h3>
+          <p class="product-desc">오름의 높낮이와 분화구를 모티브로 손끝으로 디스크를 튕겨 점수를 겨루는 인기 균형 보드게임</p>
+          <span class="product-meta">2~4인용 | 가족 대결형</span>
+        </div>
+
+        <!-- 제품 2: 한라산 구슬달리기 -->
+        <div class="product-card" onclick="fireProductConfetti('🏔️ 한라산 구슬달리기!')">
+          <span class="product-badge">인기 보조 🎯</span>
+          <div class="product-icon-box">🏔️</div>
+          <h3 class="product-name">한라산 구슬달리기</h3>
+          <p class="product-desc">구슬이 길을 따라 시원하게 구르며 한라산의 사계절과 지형을 탐험하는 흥미진진한 집중력 모험 놀이</p>
+          <span class="product-meta">전 연령 | 관찰·집중형</span>
+        </div>
+
+        <!-- 제품 3: 해녀 태왁 채우기 -->
+        <div class="product-card" onclick="fireProductConfetti('🌊 해녀 태왁 채우기!')">
+          <span class="product-badge">스토리 특화 🐚</span>
+          <div class="product-icon-box">🌊</div>
+          <h3 class="product-name">해녀 태왁 채우기</h3>
+          <p class="product-desc">제주 해녀의 물질 문화와 바다 생태를 배우며 해산물을 함께 모으는 온 가족 감성 협동 게임</p>
+          <span class="product-meta">가족·어린이 | 협동형</span>
+        </div>
+      </div>
+
+      <!-- 소형 굿즈 소개 (실제 이미지 연동) -->
+      <div class="goods-box">
+        <div class="goods-img-wrapper">
+          <img src="컨설팅자료/이미지/포켓미로키링01.jpg" alt="포켓 미로 키링" class="goods-img" onerror="this.src='컨설팅자료/이미지/나무 미로 키링과 은색 볼체인.png'">
+        </div>
+        <div class="goods-info">
+          <h3 class="goods-title">🎁 여행의 추억을 챙겨가는 [포켓 미로 키링]</h3>
+          <p class="goods-desc">한 손에 쏙 들어오는 제주 원목 미로 키링! 여행 중 언제 어디서나 가볍게 힐링하고 선물하기 좋은 감성 굿즈입니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 고객별 가치 제안 (B2C & B2B) -->
+    <section class="glass-card dual-section">
+      <h2 class="section-title">💡 누구에게 어떤 가치를 전할까요?</h2>
+      <div class="dual-grid">
+        <!-- B2C -->
+        <div class="dual-card">
+          <span class="dual-tag tag-b2c">B2C 관광 가족 고객</span>
+          <h3 class="dual-title">"아이 손잡고 떠난 제주에서 스마트폰은 잠시 안녕!"</h3>
+          <p class="dual-text">식당과 카페에서 스마트폰만 바라보던 아이들이 원목 놀이판 앞에 둘러앉아 부모님과 함께 눈을 맞추며 웃을 수 있는 따뜻한 기억을 만듭니다.</p>
+        </div>
+
+        <!-- B2B -->
+        <div class="dual-card">
+          <span class="dual-tag tag-b2b">B2B 카페·숙소 공간 운영자</span>
+          <h3 class="dual-title">"머무는 시간이 2배로 길어지는 공간 맞춤형 놀이"</h3>
+          <p class="dual-text">전기가 필요 없고 파손 걱정이 적은 친환경 목재 테이블로, 손님들의 체류 시간을 늘리고 인스타그램 포토존과 방문 후기를 자연스럽게 유도합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 서비스 모델 및 도입 가이드 -->
+    <section class="glass-card pricing-section">
+      <h2 class="section-title">💰 터치우드랩 공간 도입 및 렌탈 가이드</h2>
+      <div class="pricing-grid">
+        <div class="price-box">
+          <div class="price-type">원목 완제품 구매</div>
+          <div class="price-amount">69만 원~</div>
+          <div class="price-detail">표준형 오름 디스크 기준<br>(규격 맞춤 제작 가능)</div>
+        </div>
+
+        <div class="price-box">
+          <div class="price-type">행사·축제 1일 렌탈</div>
+          <div class="price-amount">12만 원~</div>
+          <div class="price-detail">1종 기준 (5종 패키지 70만 원)<br>운송 및 설치 지원</div>
+        </div>
+
+        <div class="price-box">
+          <div class="price-type">카페·숙소 공간 구독</div>
+          <div class="price-amount">월 35만 원</div>
+          <div class="price-detail">5종 세트 6개월 계약 기준<br>주기적 부품·제품 순환 관리</div>
+        </div>
+      </div>
+
+      <div class="cta-area">
+        <button class="cta-btn" onclick="handleInquiry()">
+          <span>📞</span> 터치우드랩 체험 및 도입 문의하기
+        </button>
+      </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+      <p>TOUCHWOOD LAB © 2026 김수정 대표 | 제주의 이야기를 놀이로 잇는 무전력 목재콘텐츠 🌲</p>
+    </footer>
+  </div>
+
+  <!-- ========================================================
+       인터랙티브 스크립트 (타이핑, 테마 전환, 축제 폭죽 효과)
+       ======================================================== -->
+  <script>
+    /* 1. 타이핑 슬로건 */
+    const slogan = "스마트폰을 내려놓고, 온 가족이 제주를 만나는 시간 🌲✨";
+    const textTarget = document.getElementById("typing-text");
+    let charIdx = 0;
+
+    function runTyping() {
+      if (charIdx < slogan.length) {
+        textTarget.textContent += slogan.charAt(charIdx);
+        charIdx++;
+        setTimeout(runTyping, 85);
+      }
+    }
+
+    /* 2. 캔바 스타일 화려한 축하 폭죽 */
+    function fireCheerConfetti() {
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#2d6a4f', '#52b788', '#e76f51', '#f4a261', '#ff0080']
+      });
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 60,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0 },
+          colors: ['#52b788', '#e76f51', '#00dfd8']
+        });
+        confetti({
+          particleCount: 60,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1 },
+          colors: ['#2d6a4f', '#f4a261', '#7928ca']
+        });
+      }, 250);
+    }
+
+    /* 3. 카드 클릭 시 반응 */
+    function fireProductConfetti(name) {
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.7 },
+        colors: ['#52b788', '#2d6a4f', '#f4a261']
+      });
+    }
+
+    /* 4. 태그 클릭 시 팝 애니메이션 */
+    function popTag(el) {
+      el.style.transform = "scale(1.2) rotate(-4deg)";
+      confetti({
+        particleCount: 25,
+        spread: 40,
+        origin: { y: 0.5 }
+      });
+      setTimeout(() => {
+        el.style.transform = "";
+      }, 220);
+    }
+
+    /* 5. 테마 변경 함수 */
+    function changeTheme(themeClass, btnEl) {
+      document.body.className = themeClass;
+
+      const allBtns = document.querySelectorAll('.theme-btn');
+      allBtns.forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+
+      confetti({
+        particleCount: 30,
+        spread: 45,
+        origin: { y: 0.2 }
+      });
+    }
+
+    /* 6. 문의하기 버튼 클릭 */
+    function handleInquiry() {
+      fireCheerConfetti();
+      alert("✨ 터치우드랩에 관심을 가져주셔서 감사합니다!\n\n🌲 브랜드: 터치우드랩 (TOUCHWOOD LAB)\n👤 대표자: 김수정\n📍 서비스: 완제품 구매, 1일 행사 렌탈, 카페·숙소 공간 구독\n\n문의 접수가 준비되었습니다!");
+    }
+
+    /* 페이지 로드 완료 시 시작 */
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(runTyping, 400);
+      setTimeout(fireCheerConfetti, 900);
+    });
+  </script>
+</body>
+</html>
